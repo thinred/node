@@ -3839,6 +3839,7 @@ bool DiffieHellman::Init(const char* p, int p_len, const char* g, int g_len) {
   return true;
 }
 
+static bool SMALL_DH_GROUPS_ENABLE = false;
 
 void DiffieHellman::DiffieHellmanGroup(
     const FunctionCallbackInfo<Value>& args) {
@@ -3859,6 +3860,9 @@ void DiffieHellman::DiffieHellmanGroup(
 
     if (strcasecmp(*group_name, it->name) != 0)
       continue;
+
+    if (it->bits < 1024 && !SMALL_DH_GROUPS_ENABLE)
+      return env->ThrowError("Small DH groups disabled (see documentation)");
 
     initialized = diffieHellman->Init(it->prime,
                                       it->prime_size,
